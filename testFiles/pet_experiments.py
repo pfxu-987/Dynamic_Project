@@ -237,17 +237,18 @@ class PET_Server:
         self.cfg.num_tasks = 128
         self.init()
         self.cfg.total_queries = 1024
-        for task_num in [128, 64, 32]:
-            self.cfg.num_tasks = task_num
-            for seq_len in [4, 8, 16, 32, 64,128]:
-                self.cfg.mean_v = seq_len
-                self.cfg.std_v = 0
-                self.prepare_query_pool()
-                for stream_num in [32, 16, 8, 4, 2, 1]:
-                    self.cfg.num_streams = stream_num
-                    self.write_log("total_queries:{},task_num:{},stream_num:{},seq_len:{} ".format(self.cfg.total_queries, self.cfg.num_tasks, stream_num,seq_len))
-                    #self.run(bs = 128)
-                    self.run(bs = int(self.cfg.total_queries // task_num))
+        for batch_size in [4,8,16,32,64,128]:
+            for task_num in [128, 64, 32]:
+                self.cfg.num_tasks = task_num
+                for seq_len in [4, 8, 16, 32, 64,128,256]:
+                    self.cfg.mean_v = seq_len
+                    self.cfg.std_v = 0
+                    self.prepare_query_pool()
+                    for stream_num in [32, 16, 8, 4, 2, 1]:
+                        self.cfg.num_streams = stream_num
+                        self.write_log("total_queries:{},task_num:{},stream_num:{},seq_len:{} ".format(self.cfg.total_queries, self.cfg.num_tasks, stream_num,seq_len))
+                        #self.run(bs = 128)
+                        self.run(bs = batch_size)
 
     def explore_capacity_pet(self):
         self.cfg.schedule_policy = "batch_schedule"
