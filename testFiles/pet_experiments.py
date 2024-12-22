@@ -128,8 +128,8 @@ class PET_Server:
             task_id = random.randint(0,self.cfg.num_tasks-1)
             task_type = self.task_types[task_id]
             generated_seq_len = int(normal[i])
-            if generated_seq_len > 256:
-                generated_seq_len = 256
+            if generated_seq_len > 128:
+                generated_seq_len = 128
             if generated_seq_len < 1:
                 generated_seq_len = 1
             query_pool.append((task_id, generated_seq_len, task_type))
@@ -237,19 +237,17 @@ class PET_Server:
         self.cfg.num_tasks = 128
         self.init()
         self.cfg.total_queries = 1024
-        for batch_size in [4,8,16,32,64,128]:
-            for task_num in [128, 64, 32]:
-                self.cfg.num_tasks = task_num
-                for seq_len in [4, 8, 16, 32, 64,128,256]:
-                    self.cfg.mean_v = seq_len
-                    self.cfg.std_v = 0
-                    self.prepare_query_pool()
-                    for stream_num in [32, 16, 8, 4, 2, 1]:
-                        self.cfg.num_streams = stream_num
-                        self.write_log("total_queries:{},task_num:{},stream_num:{},seq_len:{} ".format(self.cfg.total_queries, self.cfg.num_tasks, stream_num,seq_len))
-                        #self.run(bs = 128)
-                        self.run(bs = batch_size)
 
+        for task_num in [128, 64, 32]:
+            self.cfg.num_tasks = task_num
+            for seq_len in [4, 8, 16, 32, 64,128]:
+                self.cfg.mean_v = seq_len
+                self.cfg.std_v = 0
+                self.prepare_query_pool()
+                for stream_num in [32, 16, 8, 4, 2, 1]:
+                    self.cfg.num_streams = stream_num
+                    self.write_log("total_queries:{},task_num:{},stream_num:{},seq_len:{} ".format(self.cfg.total_queries, self.cfg.num_tasks, stream_num,seq_len))
+                    self.run(bs = 16)
     def explore_capacity_pet(self):
         self.cfg.schedule_policy = "batch_schedule"
         # self.cfg.num_tasks = 70
@@ -364,7 +362,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--seed",
         type=int,
-        default = 1
+        default = 1000
     )
     parser.add_argument(
         "--model",
