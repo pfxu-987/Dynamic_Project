@@ -11,6 +11,7 @@ import numpy as np
 import os
 from pet_scheduler import PET_Scheduler
 
+
 class PET_Server:
     def __init__(self,cfg) -> None:
         self.torch_model = None
@@ -134,8 +135,40 @@ class PET_Server:
                 generated_seq_len = 1
             query_pool.append((task_id, generated_seq_len, task_type))
 
+        # Write query_pool to a file
+        with open("num_tasks="+str(self.cfg.num_tasks)+"_seq_len="+str(self.cfg.mean_v)+".txt", "w") as file:
+            task_id_counts = {}
+            for task_id, seq_len, task_type in query_pool:
+                file.write(f"Task ID: {task_id}, Sequence Length: {seq_len}, Task Type: {task_type}\n")
+                if task_id in task_id_counts:
+                    task_id_counts[task_id] += 1
+                else:
+                    task_id_counts[task_id] = 1
+            
+            # Write task_id statistics
+            file.write("\nTask ID Statistics:\n")
+            for task_id, count in sorted(task_id_counts.items()):
+                file.write(f"Task ID {task_id}: {count} occurrences\n")
+            
+            # file.write("\nStream ID Statistics:\n")
+            # for stream_num in [32, 16, 8, 4, 2, 1]:
+            #     file.write(f"\nStream_num:{stream_num}\n")
+
+            #     stream_id_counts = {}
+            #     for task_id, count in task_id_counts.items():
+            #         stream_id = task_id % stream_num
+            #         if stream_id in stream_id_counts:
+            #             stream_id_counts[stream_id] += count
+            #         else:
+            #             stream_id_counts[stream_id] = count
+                
+            #     for stream_id, count in sorted(stream_id_counts.items()):
+            #         file.write(f"Stream ID {stream_id}: {count} occurrences\n")
+
+
         self.query_pool = query_pool
-    
+
+
     def prepare_tasks(self):
         print("Preparing PET Tasks")
         num_tasks = self.cfg.num_tasks
@@ -176,6 +209,35 @@ class PET_Server:
         elif self.cfg.schedule_policy == "two_stage_schedule":
             batches = pet_scheduler.coordinate_schedule(stage = self.cfg.schedule_stage)
         
+        with open("num_tasks=" + str(self.cfg.num_tasks) + "_seq_len=" + str(self.cfg.mean_v) + ".txt", "a") as file:
+            file.write(f"\nbatch_size:{bs}-----Stream_num:{self.cfg.num_streams}\n")
+            file.write("---------------------------------------------------")
+            count_max_min_stream_tasks = 0
+
+            # 遍历每个batch
+            for i, batch in enumerate(batches):
+                # 初始化stream_id_counts为0，大小为num_streams
+                stream_id_counts = [0 for _ in range(self.cfg.num_streams)]
+
+                # 计算每个stream_id的出现次数
+                for j in range(len(batch[1])):
+                    task_id = batch[1][j]
+                    stream_id = task_id % self.cfg.num_streams
+                    stream_id_counts[stream_id] += batch[2][j]  # 累加该stream_id的计数
+                
+                #计算最大流和最小流的差距
+                non_zero_counts = [count for count in stream_id_counts if count > 0]
+                max_count = max(non_zero_counts)
+                min_count = min(non_zero_counts)
+                count_max_min_stream_tasks += (max_count - min_count)
+
+                file.write(f"\nbatch_id:{i}\n")
+                for stream_id in range(self.cfg.num_streams):  # 遍历所有流
+                    file.write(f"Stream ID {stream_id}: {stream_id_counts[stream_id]} occurrences\n")
+
+            file.write(f"count_max_min_stream_tasks:{count_max_min_stream_tasks}\n")
+            file.write("------------------------------------------------:\n")
+
         # Warmup
         self.warmup()      
         # Start serving------------:
@@ -247,7 +309,8 @@ class PET_Server:
                 for stream_num in [32, 16, 8, 4, 2, 1]:
                     self.cfg.num_streams = stream_num
                     self.write_log("total_queries:{},task_num:{},stream_num:{},seq_len:{} ".format(self.cfg.total_queries, self.cfg.num_tasks, stream_num,seq_len))
-                    self.run(bs = 16)
+                    self.run(bs = int(self.cfg.total_queries//task_num) )
+
     def explore_capacity_pet(self):
         self.cfg.schedule_policy = "batch_schedule"
         # self.cfg.num_tasks = 70
@@ -362,7 +425,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--seed",
         type=int,
-        default = 1000
+        default = 1
     )
     parser.add_argument(
         "--model",
