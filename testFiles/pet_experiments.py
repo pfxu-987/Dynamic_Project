@@ -123,10 +123,11 @@ class PET_Server:
 
         query_pool = []
         normal = np.random.normal(self.cfg.mean_v, self.cfg.std_v, self.cfg.total_queries)
-    
+
+
         for i in range(self.cfg.total_queries):
             # randomly assign the query to a task
-            task_id = random.randint(0,self.cfg.num_tasks-1)
+            task_id = int (i // int (self.cfg.total_queries // self.cfg.num_tasks))
             task_type = self.task_types[task_id]
             generated_seq_len = int(normal[i])
             if generated_seq_len > 128:
@@ -149,32 +150,15 @@ class PET_Server:
             file.write("\nTask ID Statistics:\n")
             for task_id, count in sorted(task_id_counts.items()):
                 file.write(f"Task ID {task_id}: {count} occurrences\n")
-            
-            # file.write("\nStream ID Statistics:\n")
-            # for stream_num in [32, 16, 8, 4, 2, 1]:
-            #     file.write(f"\nStream_num:{stream_num}\n")
-
-            #     stream_id_counts = {}
-            #     for task_id, count in task_id_counts.items():
-            #         stream_id = task_id % stream_num
-            #         if stream_id in stream_id_counts:
-            #             stream_id_counts[stream_id] += count
-            #         else:
-            #             stream_id_counts[stream_id] = count
-                
-            #     for stream_id, count in sorted(stream_id_counts.items()):
-            #         file.write(f"Stream ID {stream_id}: {count} occurrences\n")
-
 
         self.query_pool = query_pool
-
 
     def prepare_tasks(self):
         print("Preparing PET Tasks")
         num_tasks = self.cfg.num_tasks
         random.seed(self.cfg.seed)
-        for _ in tqdm.tqdm(range(num_tasks)):
-            pet_type = random.randint(0, 3)
+        for i in tqdm.tqdm(range(num_tasks)):
+            pet_type = int(i // int(self.cfg.num_tasks//4) )
             self.load_new_task(pet_type)
 
     def warmup(self):
@@ -309,7 +293,7 @@ class PET_Server:
                 for stream_num in [32, 16, 8, 4, 2, 1]:
                     self.cfg.num_streams = stream_num
                     self.write_log("total_queries:{},task_num:{},stream_num:{},seq_len:{} ".format(self.cfg.total_queries, self.cfg.num_tasks, stream_num,seq_len))
-                    self.run(bs = int(self.cfg.total_queries//task_num) )
+                    self.run(bs = 128)
 
     def explore_capacity_pet(self):
         self.cfg.schedule_policy = "batch_schedule"
