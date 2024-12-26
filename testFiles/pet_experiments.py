@@ -140,7 +140,7 @@ class PET_Server:
         with open("num_tasks="+str(self.cfg.num_tasks)+"_seq_len="+str(self.cfg.mean_v)+".txt", "w") as file:
             task_id_counts = {}
             for task_id, seq_len, task_type in query_pool:
-                file.write(f"Task ID: {task_id}, Sequence Length: {seq_len}, Task Type: {task_type}\n")
+                #file.write(f"Task ID: {task_id}, Sequence Length: {seq_len}, Task Type: {task_type}\n")
                 if task_id in task_id_counts:
                     task_id_counts[task_id] += 1
                 else:
@@ -282,7 +282,7 @@ class PET_Server:
         self.cfg.schedule_policy = "batch_schedule"
         self.cfg.num_tasks = 128
         self.init()
-        self.cfg.total_queries = 1024
+        self.cfg.total_queries = 512
 
         for task_num in [128, 64, 32]:
             self.cfg.num_tasks = task_num
