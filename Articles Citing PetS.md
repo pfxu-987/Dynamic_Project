@@ -28,3 +28,12 @@ the one with **bold font** is developed based on PetS
 
 - FastPTM: Fast weights loading of pre-trained models for parallel inference service provisioning [link to paper](https://www.sciencedirect.com/science/article/pii/S0167819124000528)
 
+- Chameleon: Adaptive Caching and Scheduling for Many-Adapter LLM Inference Environments [link to paper](https://arxiv.org/abs/2411.17741)
+
+- ITIF: Integrated Transformers Inference Framework for Multiple Tenants on GPU [link to paper](https://dl.acm.org/doi/abs/10.1145/3605573.3605585)
+
+- Liger: Interleaving Intra- and Inter-Operator Parallelism for Distributed Large Model Inference [link to paper](https://dl.acm.org/doi/abs/10.1145/3627535.3638466)
+
+- Efficient Multi-task LLM Quantization and Serving for Multiple LoRA Adapters [link to paper](https://openreview.net/forum?id=HfpV6u0kbX)
+
+- DYNAMIC LORA SERVING SYSTEM FOR OFFLINE CONTEXT LEARNING [link to paper](https://people.eecs.berkeley.edu/~kubitron/courses/cs262a-F23/projects/reports/project1011_paper_92116151989678177816.pdf)
