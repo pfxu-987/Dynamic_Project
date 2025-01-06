@@ -126,14 +126,19 @@ if __name__ == '__main__':
     # load for tasks:
     print("Loading PET tasks...")
 
-    for pet_type in tqdm([PET_Types.maskbert,PET_Types.adapters]):
+    for pet_type in tqdm([PET_Types.maskbert,PET_Types.diff_pruning]):
+    # for pet_type in tqdm([PET_Types.maskbert,PET_Types.adapters]):
+    # for pet_type in tqdm([PET_Types.maskbert,PET_Types.bitfit]):
+    # for pet_type in tqdm([PET_Types.diff_pruning,PET_Types.adapters]):
+    # for pet_type in tqdm([PET_Types.diff_pruning,PET_Types.bitfit]):
+    # for pet_type in tqdm([PET_Types.adapters,PET_Types.bitfit]):
         server.load_new_task(pet_type)
     
     seed = 411
 
     for batch_size in [128]:
         for seq_len in [64,128]:
-            for nums_task0 in [1,4,8,16,32,64,127]:
+            for nums_task0 in [1,4,8,16,32,64,96,112,124,127]:
                 random.seed(seed)
                 torch.manual_seed(seed)
                 torch.torch.cuda.manual_seed(seed)  # 当前设备
