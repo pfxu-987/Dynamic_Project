@@ -37,3 +37,7 @@ the one with **bold font** is developed based on PetS
 - Efficient Multi-task LLM Quantization and Serving for Multiple LoRA Adapters [link to paper](https://openreview.net/forum?id=HfpV6u0kbX)
 
 - DYNAMIC LORA SERVING SYSTEM FOR OFFLINE CONTEXT LEARNING [link to paper](https://people.eecs.berkeley.edu/~kubitron/courses/cs262a-F23/projects/reports/project1011_paper_92116151989678177816.pdf)
+
+## Basic Work
+
+- BlockLLM: Multi-tenant Finer-grained Serving for Large Language Models .[link to paper](https://arxiv.org/abs/2404.18322)
