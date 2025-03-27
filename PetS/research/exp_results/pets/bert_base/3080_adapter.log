@@ -1,0 +1,21 @@
+total_queries:128,task_num:8,stream_num:8,seq_len:32 QPS: 1398.4928384899417
+total_queries:128,task_num:8,stream_num:4,seq_len:32 QPS: 1364.4637486383851
+total_queries:128,task_num:8,stream_num:2,seq_len:32 QPS: 1108.8392473942208
+total_queries:128,task_num:8,stream_num:1,seq_len:32 QPS: 831.5330449682555
+total_queries:128,task_num:8,stream_num:8,seq_len:64 QPS: 997.6771242298896
+total_queries:128,task_num:8,stream_num:4,seq_len:64 QPS: 911.7013193639108
+total_queries:128,task_num:8,stream_num:2,seq_len:64 QPS: 729.4227669405354
+total_queries:128,task_num:8,stream_num:1,seq_len:64 QPS: 551.8825591139466
+total_queries:128,task_num:8,stream_num:8,seq_len:96 QPS: 730.115264914014
+total_queries:128,task_num:8,stream_num:4,seq_len:96 QPS: 700.0884018706896
+total_queries:128,task_num:8,stream_num:2,seq_len:96 QPS: 610.1639940096356
+total_queries:128,task_num:8,stream_num:1,seq_len:96 QPS: 469.9631922462814
+total_queries:128,task_num:8,stream_num:8,seq_len:128 QPS: 561.3340755459215
+total_queries:128,task_num:8,stream_num:4,seq_len:128 QPS: 554.9887988322791
+total_queries:128,task_num:8,stream_num:2,seq_len:128 QPS: 506.92033507465044
+total_queries:128,task_num:8,stream_num:1,seq_len:128 QPS: 404.6871415735487
+total_queries:128,task_num:8,stream_num:8,seq_len:160 QPS: 434.44119169087213
+total_queries:128,task_num:8,stream_num:4,seq_len:160 QPS: 433.2791176477472
+total_queries:128,task_num:8,stream_num:2,seq_len:160 QPS: 407.5978348541831
+total_queries:128,task_num:8,stream_num:1,seq_len:160 QPS: 340.2668409522207
+
