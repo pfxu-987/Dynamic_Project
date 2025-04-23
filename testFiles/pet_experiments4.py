@@ -1,6 +1,6 @@
 import torch
 from torch.random import seed
-from transformers.modeling_bert import BertModel, BertConfig
+from transformers.models.bert.modeling_bert import BertModel, BertConfig
 import turbo_transformers
 import time
 from turbo_transformers.layers import PET_Types, PETBertModel, PETBertConfig
@@ -9,7 +9,7 @@ import argparse
 import tqdm
 import numpy as np
 import os
-from research.python_scripts.pet_scheduler1 import PET_Scheduler
+from pet_scheduler import PET_Scheduler
 
 class PET_Server:
     def __init__(self,cfg) -> None:
@@ -132,7 +132,7 @@ class PET_Server:
         normal = np.random.normal(self.cfg.mean_v, self.cfg.std_v, self.cfg.total_queries)
 
         # 泊松分布的λ参数（平均每单位时间的到达次数）
-        lambda_val = 100
+        lambda_val = 250
         arrival_time = 0
         for i in range(self.cfg.total_queries):
             interval = np.random.exponential(1.0 / lambda_val)
@@ -215,7 +215,7 @@ class PET_Server:
 
     def run(self, no_log = False, bs = 32, current_query_pool = None):
         turbo_transformers.set_num_streams(self.cfg.num_streams)
-
+        
         batching_start_time = time.time()
         pet_scheduler = self.get_scheduler(current_query_pool)
         # Schedule the queries
@@ -319,7 +319,7 @@ class PET_Server:
 
     def compare_latency_with_arrivals(self):
         self.init_logger("compare_latency_with_arrivals")
-        self.cfg.schedule_policy = "two_stage_schedule"
+        self.cfg.schedule_policy = "batch_schedule"
         self.cfg.num_tasks = 128
         self.cfg.num_streams = 1
         self.init()
@@ -363,6 +363,14 @@ class PET_Server:
                     current_query_pool = []
                     make_querypool_id = 0
                     while(self.query_ptr < len(self.arrival_time_list)):
+                        if len(current_query_pool) > 0:
+                            first_query_time = current_query_pool[0][3]
+                            if self.current_time - first_query_time >= 1:
+                                print("len of current_query_pool:{}".format(len(current_query_pool)))
+                                self.run(current_query_pool = current_query_pool)
+                                make_querypool_id = 0
+                                current_query_pool = []
+                                continue
                         # 取出当前时间内的query
                         cur_time = self.current_time
                         cur_query_time = self.arrival_time_list[self.query_ptr]
@@ -372,11 +380,12 @@ class PET_Server:
                                 current_query_pool.append(self.query_pool[self.query_ptr])
                                 self.query_ptr += 1
                                 make_querypool_id += 1
-                                if self.query_ptr == len(self.arrival_time_list):
+                                if self.query_ptr == len(self.query_pool):
+                                    print("len of current_query_pool:{}".format(len(current_query_pool)))
                                     self.run(current_query_pool = current_query_pool)
                                     break
                                 else:
-                                    if make_querypool_id != 128:
+                                    if make_querypool_id != 256:
                                         continue
                             else:
                                 current_query_pool.append(self.query_pool[self.query_ptr])
@@ -386,19 +395,22 @@ class PET_Server:
                             current_query_pool.append(self.query_pool[self.query_ptr])
                             self.query_ptr += 1
                             make_querypool_id += 1
-                            if self.query_ptr == len(self.arrival_time_list):
+                            if self.query_ptr == len(self.query_pool):
+                                print("len of current_query_pool:{}".format(len(current_query_pool)))
                                 self.run(current_query_pool = current_query_pool)
                                 break
                             else:
-                                if make_querypool_id != 128:
+                                if make_querypool_id != 256:
                                     continue
                         make_querypool_id = 0
+                        print("len of current_query_pool:{}".format(len(current_query_pool)))
                         self.run(current_query_pool = current_query_pool)
                         current_query_pool = []
                     # 打印出arrival_time_list的前10个元素和completion_time_list的前10个元素
                     print("arrival_time_list: ", self.arrival_time_list[:10])
                     print("completion_time_list: ", self.completion_time_list[:10])
                     # self.plot_completion_time_cdf("completion_time_cdf_Arrival.png")
+                    print("length of completion_time_list", len(self.completion_time_list))
                     latency_list = [self.completion_time_list[i] - self.arrival_time_list[i] for i in range(len(self.arrival_time_list))]
                     latency_avg = sum(latency_list) / len(latency_list)
                     latency_max = max(latency_list)
